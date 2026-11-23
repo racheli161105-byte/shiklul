@@ -3,7 +3,7 @@
  * - App files: cache-first (bump VERSION when you change them, so users get the update)
  * - Google Fonts: stale-while-revalidate
  */
-const VERSION = "shiklul-v2";
+const VERSION = "shiklul-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -26,7 +26,7 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith("shiklul-") && k !== VERSION).map(k => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -58,7 +58,8 @@ self.addEventListener("fetch", event => {
 
   event.respondWith(
     caches.match(request).then(cached => cached || fetch(request).then(res => {
-      if (res.ok) caches.open(VERSION).then(cache => cache.put(request, res.clone()));
+      // clone right away: the body can only be read once, and the page reads it first
+      if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(cache => cache.put(request, copy)); }
       return res;
     })),
   );

@@ -4,7 +4,7 @@
   "description": "כל שקל יודע לאן הוא הולך. תקציב חודשי, מעקב הוצאות והשוואה בין חודשים.",
   "lang": "he",
   "dir": "rtl",
-  "id": "./",
+  "id": "/shiklul/",
   "start_url": "./#month",
   "scope": "./",
   "display": "standalone",
