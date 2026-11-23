@@ -1,0 +1,13 @@
+{
+  "name": "shiklul",
+  "version": "1.0.0",
+  "description": "שקלול: personal monthly budget planner in Hebrew. Monthly sheet, budget envelopes, month comparison. Vanilla JS.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "npx serve .",
+    "test": "node --test *.test.js"
+  },
+  "author": "Racheli Arzon",
+  "license": "MIT"
+}

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>שקלול · מתכנן תקציב אישי</title>
+  <meta name="description" content="שקלול: מתכנן תקציב אישי. מזינים הכנסות והוצאות קבועות ומשתנות כל חודש, ומשווים בין החודשים." />
+  <meta name="theme-color" content="#0f3d34" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="שקלול" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    try {
+      document.documentElement.dataset.theme = localStorage.getItem("shiklul-theme") ||
+        (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    } catch (e) { document.documentElement.dataset.theme = "light"; }
+  </script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="lgBox" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f6b55"/><stop offset="1" stop-color="#0c3b31"/></linearGradient>
+      <linearGradient id="lgCoin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3dc9b"/><stop offset="1" stop-color="#c0922f"/></linearGradient>
+      <symbol id="logo" viewBox="0 0 64 64">
+        <rect x="5" y="19" width="54" height="40" rx="14" fill="url(#lgBox)" stroke="#e9cf8c" stroke-opacity=".7" stroke-width="1.6"/>
+        <rect x="21" y="26" width="22" height="5" rx="2.5" fill="#06221c" opacity=".6"/>
+        <path d="M15 50 L25 43 L33 47 L46 37" fill="none" stroke="#f3dc9b" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M40 36.5 H46.5 V43" fill="none" stroke="#f3dc9b" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="32" cy="15" r="11" fill="url(#lgCoin)" stroke="#fbf7ee" stroke-width="2.5"/>
+        <text x="32" y="19.6" text-anchor="middle" font-family="Arial, sans-serif" font-weight="800" font-size="13" fill="#6b4a12">₪</text>
+      </symbol>
+    </defs>
+  </svg>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <a class="brand" href="#month" aria-label="שקלול, לעמוד הראשי">
+        <svg class="logo-mark" viewBox="0 0 64 64" aria-hidden="true"><use href="#logo"/></svg>
+        <span class="brand-text">
+          <strong>שקלול</strong>
+          <span class="tagline">כל שקל יודע לאן הוא הולך</span>
+        </span>
+      </a>
+      <p class="hero-sub">מתכננים בתחילת החודש, רואים כל הוצאה בזמן אמת, ונשארים בתקציב עד הסוף.</p>
+      <div class="hero-actions">
+        <button class="btn install-btn" id="installBtn" hidden>📲 התקנת האפליקציה</button>
+        <button class="icon-btn theme" id="themeBtn" aria-label="החלפת ערכת צבעים">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="bar">
+    <nav class="tabs" role="tablist" aria-label="תצוגות">
+      <a href="#month" role="tab" data-view="month">📝 החודש שלי</a>
+      <a href="#plan" role="tab" data-view="plan">🎯 תקציב ומעקב</a>
+      <a href="#compare" role="tab" data-view="compare">📊 השוואה</a>
+    </nav>
+    <div class="month-nav" aria-label="בחירת חודש">
+      <button class="icon-btn" id="prevMonth" aria-label="חודש קודם">›</button>
+      <button class="month-label" id="monthLabel" title="חזרה לחודש הנוכחי"></button>
+      <button class="icon-btn" id="nextMonth" aria-label="חודש הבא">‹</button>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="demo-banner" id="demoBanner" hidden>
+      <span>👀 אתם מסתכלים על <b>נתוני דוגמה</b>. הם לא נשמרים.</span>
+      <button class="btn small primary" id="startFresh">חזרה לטבלה ריקה</button>
+    </div>
+
+    <section class="welcome card" id="welcome" hidden>
+      <div class="welcome-text">
+        <h2>ברוכים הבאים לשקלול 👋</h2>
+        <p class="muted">הטבלה ריקה ומחכה לנתונים שלכם. שלושה צעדים ואתם בשליטה:</p>
+        <ol class="steps">
+          <li><b>הכנסות:</b> כמה נכנס החודש (משכורת, עסק, קצבאות)</li>
+          <li><b>הוצאות קבועות:</b> שכירות, ארנונה, חשמל, מים ועוד</li>
+          <li><b>תקציב:</b> כמה מותר להוציא החודש על סופר, מסעדות ובילויים, ואז רושמים כל הוצאה</li>
+        </ol>
+      </div>
+      <div class="welcome-actions">
+        <button class="btn primary" id="startTyping">✍️ מתחילים למלא</button>
+        <button class="btn" id="peekDemo">רוצים לראות דוגמה קודם?</button>
+      </div>
+    </section>
+
+    <section class="summary" id="summary" aria-live="polite"></section>
+
+    <!-- ============ VIEW: month ============ -->
+    <section class="view" id="view-month">
+      <div class="month-grid">
+        <div class="sheet-col">
+          <div class="sheet-tools">
+            <p class="muted tip">💡 אפשר להקליד כמה סכומים עם פלוס, למשל <code>120+85</code>. הכול נשמר אוטומטית.</p>
+            <div class="row">
+              <button class="btn small" id="copyPrev">📋 העתקת הקבועות מהחודש הקודם</button>
+              <button class="btn small" id="manageCats">⚙️ ניהול קטגוריות</button>
+            </div>
+          </div>
+          <div id="sheet"></div>
+        </div>
+
+        <aside class="side-col">
+          <article class="card">
+            <header class="card-head"><h2>לאן הכסף הלך?</h2></header>
+            <div id="donut"></div>
+            <ul class="legend" id="legend"></ul>
+          </article>
+          <article class="card">
+            <header class="card-head"><h2>קבועות מול משתנות</h2></header>
+            <div class="split" id="split"></div>
+          </article>
+          <article class="card">
+            <header class="card-head"><h2>מה השתנה החודש?</h2></header>
+            <ul class="movers" id="movers"></ul>
+          </article>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ VIEW: compare ============ -->
+    <section class="view" id="view-compare" hidden>
+      <div class="compare-top">
+        <article class="card chart-card">
+          <header class="card-head wrap">
+            <h2>הכנסות מול הוצאות</h2>
+            <div class="seg" role="radiogroup" id="rangeSeg" aria-label="טווח חודשים">
+              <button role="radio" data-range="3">3 חודשים</button>
+              <button role="radio" data-range="6">חצי שנה</button>
+              <button role="radio" data-range="12">שנה</button>
+            </div>
+          </header>
+          <div class="keys"><span class="key inc">הכנסות</span><span class="key fix">קבועות</span><span class="key var">משתנות</span></div>
+          <div id="bars"></div>
+        </article>
+        <article class="card">
+          <header class="card-head"><h2>בשורה התחתונה</h2></header>
+          <ul class="facts" id="facts"></ul>
+        </article>
+      </div>
+
+      <article class="card">
+        <header class="card-head wrap">
+          <h2>טבלת השוואה לפי קטגוריה</h2>
+          <label class="check"><input type="checkbox" id="showEmpty" /> הצגת שורות ריקות</label>
+        </header>
+        <div class="table-wrap"><table class="cmp" id="cmpTable"></table></div>
+        <p class="muted small-note">הצבע בכל שורה מראה באיזה חודש ההוצאה הייתה הכי גבוהה. ▲▼ מסמנים חודש שחורג ביותר מ-15% מהממוצע.</p>
+      </article>
+    </section>
+
+    <!-- ============ VIEW: plan ============ -->
+    <section class="view" id="view-plan" hidden>
+      <article class="card plan-head">
+        <div>
+          <h2>התקציב של החודש</h2>
+          <p class="muted">קובעים סכום לכל קטגוריה בתחילת החודש ומוסיפים כל הוצאה מתחתיה. רואים מיד כמה נשאר.</p>
+        </div>
+        <div class="plan-stats" id="planStats"></div>
+        <button class="btn primary" id="editBudgets">✏️ הגדרת תקציב</button>
+      </article>
+      <div class="envelopes" id="envelopes"></div>
+
+      <article class="card">
+        <header class="card-head">
+          <h2>יעדי חיסכון</h2>
+          <button class="link-btn" id="addGoal">＋ יעד חדש</button>
+        </header>
+        <ul class="goals" id="goals"></ul>
+      </article>
+    </section>
+
+    <section class="tools">
+      <button class="btn small" id="exportCsv">⬇ ייצוא טבלה ל-Excel</button>
+      <button class="btn small" id="exportJson">💾 גיבוי</button>
+      <label class="btn small file-btn">⬆ שחזור מגיבוי<input type="file" id="importJson" accept="application/json,.json" hidden /></label>
+      <button class="btn small" id="loadDemo">נתוני דוגמה</button>
+      <button class="btn small danger" id="resetBtn">איפוס</button>
+    </section>
+  </main>
+
+  <footer class="footer">
+    נבנה על ידי <strong>רחלי ארזון</strong> · HTML, CSS ו-JavaScript נקי · הנתונים נשמרים רק בדפדפן שלך 🔒
+  </footer>
+
+  <!-- Categories dialog -->
+  <dialog id="catDialog" class="sheet-dialog">
+    <form method="dialog" id="catForm">
+      <h3>ניהול קטגוריות</h3>
+      <p class="muted">כל אחד מתאים לעצמו: אפשר להוסיף קטגוריה חדשה או להסיר כאלה שלא רלוונטיות.</p>
+      <div id="catList" class="cat-list"></div>
+      <fieldset class="add-cat">
+        <legend>הוספת קטגוריה</legend>
+        <div class="row">
+          <label class="narrow">אייקון <input name="icon" maxlength="4" value="🏷️" /></label>
+          <label>שם <input name="name" maxlength="30" placeholder="למשל: גן ילדים" /></label>
+          <label>סוג
+            <select name="kind">
+              <option value="variable">הוצאה משתנה</option>
+              <option value="fixed">הוצאה קבועה</option>
+              <option value="income">הכנסה</option>
+            </select>
+          </label>
+        </div>
+        <button type="submit" class="btn small primary">＋ הוספה</button>
+      </fieldset>
+      <p class="errors" id="catErrors" role="alert"></p>
+      <div class="dialog-actions"><span class="spacer"></span><button type="button" class="btn" data-close>סגירה</button></div>
+    </form>
+  </dialog>
+
+  <!-- Budgets dialog -->
+  <dialog id="budgetDialog" class="sheet-dialog">
+    <form method="dialog" id="budgetForm">
+      <h3>תקציב חודשי לפי קטגוריה</h3>
+      <p class="muted">השאירו ריק לקטגוריה בלי תקציב.</p>
+      <div class="budget-fields" id="budgetFields"></div>
+      <div class="dialog-actions">
+        <span class="spacer"></span>
+        <button type="button" class="btn" data-close>ביטול</button>
+        <button type="submit" class="btn primary">שמירה</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Goal dialog -->
+  <dialog id="goalDialog" class="sheet-dialog">
+    <form method="dialog" id="goalForm">
+      <h3 id="goalTitle">יעד חיסכון חדש</h3>
+      <div class="row">
+        <label class="narrow">אייקון <input name="icon" maxlength="4" value="🎯" /></label>
+        <label>שם היעד <input name="name" maxlength="30" placeholder="למשל: חופשה" /></label>
+      </div>
+      <div class="row">
+        <label>סכום יעד (₪) <input name="target" type="number" min="1" /></label>
+        <label>נחסך עד עכשיו (₪) <input name="saved" type="number" min="0" value="0" /></label>
+      </div>
+      <p class="errors" id="goalErrors" role="alert"></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn danger" id="goalDelete" hidden>מחיקה</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" data-close>ביטול</button>
+        <button type="submit" class="btn primary">שמירה</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Install instructions (iPhone / browsers without an install prompt) -->
+  <dialog id="installDialog" class="sheet-dialog small-sheet">
+    <form method="dialog">
+      <h3>📲 התקנת שקלול כאפליקציה</h3>
+      <div class="install-steps">
+        <p><b>באייפון / אייפד (Safari):</b></p>
+        <ol>
+          <li>לחצו על כפתור השיתוף <span class="kbd">⬆︎</span> בתחתית המסך</li>
+          <li>גללו ובחרו <b>"הוספה למסך הבית"</b></li>
+          <li>לחצו <b>"הוסף"</b>. האייקון של שקלול יופיע עם שאר האפליקציות</li>
+        </ol>
+        <p><b>באנדרואיד (Chrome):</b> תפריט ⋮ ← <b>"התקנת אפליקציה"</b></p>
+        <p><b>במחשב (Chrome / Edge):</b> לחצו על סמל ההתקנה <span class="kbd">⊕</span> בצד שורת הכתובת</p>
+      </div>
+      <div class="dialog-actions"><span class="spacer"></span><button value="ok" class="btn primary">הבנתי</button></div>
+    </form>
+  </dialog>
+
+  <!-- Confirm dialog -->
+  <dialog id="confirmDialog" class="sheet-dialog small-sheet">
+    <form method="dialog">
+      <p id="confirmMsg" class="confirm-msg"></p>
+      <div class="dialog-actions">
+        <span class="spacer"></span>
+        <button value="cancel" class="btn">ביטול</button>
+        <button value="ok" class="btn primary" id="confirmOk">אישור</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
